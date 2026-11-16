@@ -1,0 +1,142 @@
+{
+  "scenario": "口岸拥堵与冷链异常的事件关联、处置分派",
+  "synthetic": true,
+  "records": [
+    {
+      "record_id": "shipment-s1",
+      "payload": {
+        "shipment_id": "s1",
+        "route_code": "kunming-hekou-hanoi",
+        "vehicle_class": "reefer",
+        "cargo_class": "cold",
+        "eta_min": 620,
+        "border_queue": 280,
+        "warehouse_load": 0.72,
+        "temperature": 6.5,
+        "customs_status": "clear",
+        "capacity_units": 18,
+        "priority": 5,
+        "event_sequence": 1
+      },
+      "occurred_at": "2026-11-16T01:00:00+00:00",
+      "source": "synthetic-local-acceptance"
+    },
+    {
+      "record_id": "shipment-s2",
+      "payload": {
+        "shipment_id": "s2",
+        "route_code": "hekou-hanoi-haiphong",
+        "vehicle_class": "box",
+        "cargo_class": "dry",
+        "eta_min": 540,
+        "border_queue": 300,
+        "warehouse_load": 0.4,
+        "temperature": 26.0,
+        "customs_status": "clear",
+        "capacity_units": 22,
+        "priority": 4,
+        "event_sequence": 2
+      },
+      "occurred_at": "2026-11-16T01:10:00+00:00",
+      "source": "synthetic-local-acceptance"
+    },
+    {
+      "record_id": "shipment-s3",
+      "payload": {
+        "shipment_id": "s3",
+        "route_code": "hanoi-vientiane-bangkok",
+        "vehicle_class": "box",
+        "cargo_class": "dry",
+        "eta_min": 700,
+        "border_queue": 90,
+        "warehouse_load": 0.3,
+        "temperature": 27.0,
+        "customs_status": "clear",
+        "capacity_units": 26,
+        "priority": 2,
+        "event_sequence": 3
+      },
+      "occurred_at": "2026-11-16T01:20:00+00:00",
+      "source": "synthetic-local-acceptance"
+    }
+  ],
+  "incidents": [
+    {
+      "event_id": "port-hekou-01",
+      "kind": "port_congestion",
+      "node": "hekou",
+      "occurred_at": "2026-11-16T01:30:00+00:00",
+      "reported_at": "2026-11-16T01:35:00+00:00",
+      "source": "port_authority",
+      "route_code": "kunming-hekou-hanoi",
+      "severity": 4,
+      "payload": {"segments": ["kunming", "hekou", "hanoi"], "note": "卡口车辆积压 3 公里"}
+    },
+    {
+      "event_id": "port-hekou-02",
+      "kind": "port_congestion",
+      "node": "hekou",
+      "occurred_at": "2026-11-16T02:10:00+00:00",
+      "reported_at": "2026-11-16T02:20:00+00:00",
+      "source": "carrier",
+      "route_code": "kunming-hekou-hanoi",
+      "severity": 3,
+      "payload": {"segments": ["kunming", "hekou", "hanoi"], "note": "承运商再次上报同一拥堵"}
+    },
+    {
+      "event_id": "port-hekou-02-dup",
+      "kind": "port_congestion",
+      "node": "hekou",
+      "occurred_at": "2026-11-16T02:10:00+00:00",
+      "reported_at": "2026-11-16T02:20:00+00:00",
+      "source": "carrier",
+      "route_code": "kunming-hekou-hanoi",
+      "severity": 3,
+      "payload": {"segments": ["kunming", "hekou", "hanoi"], "note": "承运商再次上报同一拥堵"}
+    },
+    {
+      "event_id": "cold-s1-01",
+      "kind": "cold_chain",
+      "node": "hekou",
+      "occurred_at": "2026-11-16T03:00:00+00:00",
+      "reported_at": "2026-11-16T03:05:00+00:00",
+      "source": "sensor",
+      "route_code": "kunming-hekou-hanoi",
+      "severity": 5,
+      "payload": {"segments": ["kunming", "hekou", "hanoi"], "cargo_class": "cold", "temperature": 9.8}
+    },
+    {
+      "event_id": "cold-dry-01",
+      "kind": "cold_chain",
+      "node": "hekou",
+      "occurred_at": "2026-11-16T03:20:00+00:00",
+      "reported_at": "2026-11-16T03:25:00+00:00",
+      "source": "sensor",
+      "route_code": "hekou-hanoi-haiphong",
+      "severity": 2,
+      "payload": {"segments": ["hekou", "hanoi", "haiphong"], "cargo_class": "dry"}
+    },
+    {
+      "event_id": "customs-hanoi-01",
+      "kind": "customs_hold",
+      "node": "hanoi",
+      "occurred_at": "2026-11-16T05:30:00+00:00",
+      "reported_at": "2026-11-16T05:40:00+00:00",
+      "source": "customs_system",
+      "route_code": "hekou-hanoi-haiphong",
+      "severity": 4,
+      "payload": {"segments": ["hekou", "hanoi", "haiphong"], "cause_event_id": "port-hekou-01"}
+    },
+    {
+      "event_id": "cold-s3-late",
+      "kind": "cold_chain",
+      "node": "vientiane",
+      "occurred_at": "2026-11-16T06:00:00+00:00",
+      "reported_at": "2026-11-18T06:00:00+00:00",
+      "source": "forwarder",
+      "route_code": "hanoi-vientiane-bangkok",
+      "severity": 3,
+      "payload": {"segments": ["hanoi", "vientiane", "bangkok"], "cargo_class": "dry", "note": "迟到 48 小时补报"}
+    }
+  ]
+}

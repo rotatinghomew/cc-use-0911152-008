@@ -242,6 +242,15 @@ class Repository:
             rows = connection.execute("SELECT decision_json FROM decisions ORDER BY record_id,decided_at").fetchall()
         return [json.loads(row[0]) for row in rows]
 
+    def transport_orders(self) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            exists = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='transport_orders'").fetchone()
+            if not exists:
+                return []
+            rows = connection.execute("SELECT * FROM transport_orders ORDER BY order_id").fetchall()
+        return [dict(row) | {"edges": json.loads(row["edges_json"])} for row in rows]
+
     def event_rows(self) -> list[dict[str, Any]]:
         with self.connect() as connection:
             rows = connection.execute("SELECT * FROM events ORDER BY event_id").fetchall()

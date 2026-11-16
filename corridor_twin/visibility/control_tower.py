@@ -60,16 +60,25 @@ def build_summary(records: list[DomainRecord], decisions: Mapping[str, Decision]
 
 
 def export_bundle(output: str | Path, records: list[DomainRecord], decisions: Mapping[str, Decision],
-                  snapshot: Mapping[str, Any], events: list[dict[str, Any]]) -> dict[str, Any]:
+                  snapshot: Mapping[str, Any], events: list[dict[str, Any]],
+                  incidents: Mapping[str, Any] | None = None) -> dict[str, Any]:
     root = ensure_output(output)
     summary = build_summary(records, decisions, snapshot)
+    if incidents is not None:
+        summary["incident_chains"] = len(incidents.get("chains", []))
+        summary["incident_work"] = len(incidents.get("work", []))
+        summary["incident_tickets"] = sorted({ticket for chain in incidents.get("chains", [])
+                                              for ticket in chain.get("tickets", [])})
     record_count = write_records(root / "records.csv", records, decisions)
     rule_count = write_rules(root / "rules.csv", decisions)
     summary_hash = write_json(root / "summary.json", summary)
     decision_hash = write_json(root / "decisions.json", [value.as_dict() for _, value in sorted(decisions.items())])
     event_hash = write_json(root / "audit-events.json", events)
-    manifest = {"files": {"summary.json": summary_hash, "decisions.json": decision_hash,
-                           "audit-events.json": event_hash}, "record_rows": record_count,
+    files = {"summary.json": summary_hash, "decisions.json": decision_hash,
+             "audit-events.json": event_hash}
+    if incidents is not None:
+        files["incidents.json"] = write_json(root / "incidents.json", incidents)
+    manifest = {"files": files, "record_rows": record_count,
                 "rule_rows": rule_count, "created_at": utc_now()}
     manifest["manifest_hash"] = stable_hash(manifest)
     write_json(root / "manifest.json", manifest)
